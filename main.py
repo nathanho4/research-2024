@@ -5,8 +5,12 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 
-def preprocess_data(file):
+def load_data(file):
     data = np.genfromtxt(file, delimiter=';', dtype='str', skip_header=1)
+
+    return data
+
+def preprocess_data(data):
     X = data[:, :-1]
     y = data[:, -1]
 
@@ -29,8 +33,14 @@ def preprocess_data(file):
 
     return X_processed, y
 
-def createModel(file):
-    X, y = preprocess_data(file)
+def createModel(features_string, data):
+
+    # Convert the feature string to a boolean mask
+    feature_mask = np.array([int(char) for char in features_string]) == 1
+
+    # Select the features from the data using the mask
+    selected_features = data[:, feature_mask]
+    X, y = preprocess_data(selected_features)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 
     model = SVC(kernel='linear')
@@ -42,7 +52,8 @@ def createModel(file):
     return f1score
 
 def main():
-    print("f1 Score:", createModel('data.csv'))
+    data = load_data('data.csv')
+    print("f1 Score:", createModel('0010101000100101101111010110010011001', data))
 
 if __name__ == '__main__':
     main()
